@@ -2,7 +2,6 @@
 // Family Dashboard - Modular React Component Pattern
 // Modeled after Mango V4 UI Architecture
 // ============================================
-
 import React, { useState, useEffect } from 'react';
 
 // ============================================
@@ -34,18 +33,18 @@ const themes = {
 // ============================================
 const initialData = {
   familyMembers: [
-    { id: 1, name: "Bobby", role: "Child", avatar: "👦", points: 95, completedTasks: 12 },
-    { id: 2, name: "Caine", role: "Child", avatar: "🧒", points: 88, completedTasks: 11 },
-    { id: 3, name: "Rayne", role: "Child", avatar: "👧", points: 102, completedTasks: 14 },
-    { id: 4, name: "Brad", role: "Child", avatar: "🧑", points: 76, completedTasks: 9 },
-    { id: 5, name: "Estelle", role: "Child", avatar: "👩", points: 110, completedTasks: 15 }
+    { id: 1, name: 'Bobby', role: 'Child', avatar: '👦', points: 95, completedTasks: 12 },
+    { id: 2, name: 'Caine', role: 'Child', avatar: '🧒', points: 88, completedTasks: 11 },
+    { id: 3, name: 'Rayne', role: 'Child', avatar: '👧', points: 102, completedTasks: 14 },
+    { id: 4, name: 'Brad', role: 'Child', avatar: '🧑', points: 76, completedTasks: 9 },
+    { id: 5, name: 'Estelle', role: 'Child', avatar: '👩', points: 110, completedTasks: 15 }
   ],
   chores: [
-    { id: 1, title: "Kitchen Cleanup", description: "Do the dishes and wipe counters", category: "Kitchen", points: 15, assignedTo: "Bobby", dueDate: "2025-10-01", recurring: "daily", status: "pending" },
-    { id: 2, title: "Take Out Trash", description: "Collect all house trash & bring out", category: "General", points: 10, assignedTo: "Caine", dueDate: "2025-10-01", recurring: "weekly", status: "pending" },
-    { id: 3, title: "Vacuum Living Room", description: "Vacuum all carpets & rugs", category: "Living Areas", points: 20, assignedTo: "Rayne", dueDate: "2025-10-02", recurring: "weekly", status: "pending" },
-    { id: 4, title: "Mow Lawn", description: "Mow front and back yards", category: "Yard Work", points: 25, assignedTo: "Brad", dueDate: "2025-10-03", recurring: "weekly", status: "pending" },
-    { id: 5, title: "Feed Pets", description: "Feed dogs and cats", category: "Pets", points: 5, assignedTo: "Estelle", dueDate: "2025-10-01", recurring: "daily", status: "pending" }
+    { id: 1, title: 'Kitchen Cleanup', description: 'Do the dishes and wipe counters', category: 'Kitchen', points: 15, assignedTo: 'Bobby', dueDate: '2025-10-01', recurring: 'daily', status: 'pending' },
+    { id: 2, title: 'Take Out Trash', description: 'Collect all house trash & bring out', category: 'General', points: 10, assignedTo: 'Caine', dueDate: '2025-10-01', recurring: 'weekly', status: 'pending' },
+    { id: 3, title: 'Vacuum Living Room', description: 'Vacuum all carpets & rugs', category: 'Living Areas', points: 20, assignedTo: 'Rayne', dueDate: '2025-10-02', recurring: 'weekly', status: 'pending' },
+    { id: 4, title: 'Mow Lawn', description: 'Mow front and back yards', category: 'Yard Work', points: 25, assignedTo: 'Brad', dueDate: '2025-10-03', recurring: 'weekly', status: 'pending' },
+    { id: 5, title: 'Feed Pets', description: 'Feed dogs and cats', category: 'Pets', points: 5, assignedTo: 'Estelle', dueDate: '2025-10-01', recurring: 'daily', status: 'pending' }
   ]
 };
 
@@ -73,9 +72,8 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }) => {
 const ChildChoreWidget = ({ child, chores, theme, onCompleteChore }) => {
   const childChores = chores.filter(c => c.assignedTo === child.name);
   const t = themes[theme];
-
   return (
-    <div className={`${t.card} ${t.border} border rounded-lg p-6 shadow-lg transition-all hover:shadow-xl`}>
+    <div className={`${t.card} ${t.border} border p-6 rounded-lg shadow-lg transition-all hover:shadow-xl`}>
       {/* Child Header */}
       <div className="flex items-center mb-4">
         <span className="text-4xl mr-3">{child.avatar}</span>
@@ -88,20 +86,19 @@ const ChildChoreWidget = ({ child, chores, theme, onCompleteChore }) => {
           <p className={`text-sm ${t.subtext}`}>{child.completedTasks} completed</p>
         </div>
       </div>
-
       {/* Chore List */}
       <div className="space-y-3">
-        <h4 className={`font-semibold ${t.text} mb-2`}>Active Chores:</h4>
+        <h4 className={`font-semibold mb-2 ${t.text}`}>Active Chores:</h4>
         {childChores.length === 0 ? (
           <p className={t.subtext}>No chores assigned</p>
         ) : (
           childChores.map(chore => (
-            <div key={chore.id} className={`${t.border} border-b pb-3`}>
+            <div key={chore.id} className={`pb-3 border-b ${t.border}`}>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <p className={`font-medium ${t.text}`}>{chore.title}</p>
-                  <p className={`text-sm ${t.subtext}`}>{chore.description}</p>
-                  <p className={`text-xs ${t.subtext} mt-1`}>
+                  <p className={t.subtext}>{chore.description}</p>
+                  <p className={`text-xs mt-1 ${t.subtext}`}>
                     Due: {chore.dueDate} • {chore.recurring}
                   </p>
                 </div>
@@ -134,10 +131,9 @@ const StatsDashboard = ({ chores, familyMembers, theme }) => {
   const totalPoints = familyMembers.reduce((sum, member) => sum + member.points, 0);
   const pendingChores = chores.filter(c => c.status === 'pending').length;
   const completedChores = chores.filter(c => c.status === 'completed').length;
-
   return (
-    <div className={`${t.card} ${t.border} border rounded-lg p-6 shadow-lg`}>
-      <h3 className={`text-2xl font-bold ${t.text} mb-4`}>📊 Family Stats</h3>
+    <div className={`${t.card} ${t.border} border p-6 rounded-lg shadow-lg`}>
+      <h3 className={`text-2xl font-bold mb-4 ${t.text}`}>📊 Family Stats</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p className={`text-sm ${t.subtext}`}>Total Points</p>
@@ -145,11 +141,11 @@ const StatsDashboard = ({ chores, familyMembers, theme }) => {
         </div>
         <div>
           <p className={`text-sm ${t.subtext}`}>Pending Chores</p>
-          <p className={`text-3xl font-bold text-yellow-500`}>{pendingChores}</p>
+          <p className="text-3xl font-bold text-yellow-500">{pendingChores}</p>
         </div>
         <div>
           <p className={`text-sm ${t.subtext}`}>Completed</p>
-          <p className={`text-3xl font-bold text-green-500`}>{completedChores}</p>
+          <p className="text-3xl font-bold text-green-500">{completedChores}</p>
         </div>
         <div>
           <p className={`text-sm ${t.subtext}`}>Family Members</p>
@@ -161,21 +157,33 @@ const StatsDashboard = ({ chores, familyMembers, theme }) => {
 };
 
 // ============================================
-// WIDGET: Calendar Widget (Placeholder)
-// Can be expanded to show events and schedules
+// WIDGET: Google Calendar Widget
+// Embeds Google Calendar agenda for next 2 weeks
 // ============================================
 const CalendarWidget = ({ theme }) => {
   const t = themes[theme];
+  // NOTE: Replace the src below with your Google Calendar embed URL
+  // You can get it from Google Calendar settings -> Settings for my calendars -> Integrate calendar -> Public URL to this calendar (embed URL). Ensure the calendar is public for embedding.
+  const calendarSrc = 'https://calendar.google.com/calendar/embed?mode=AGENDA&wkst=1&showTitle=0&showDate=0&showPrint=0&showTabs=0&showNav=1&showCalendars=0&showTz=0&height=600&bgcolor=%23ffffff&ctz=America%2FNew_York&src=YOUR_CALENDAR_ID%40group.calendar.google.com&color=%231B887A';
+
+  // Helper to compute two-week window using Google embed parameters
+  // Google Calendar agenda view will naturally show upcoming events; users can scroll. For stricter range control, you could append dates with dates=YYYYMMDD/YYYYMMDD on advanced embeds.
+
   return (
-    <div className={`${t.card} ${t.border} border rounded-lg p-6 shadow-lg`}>
-      <h3 className={`text-xl font-bold ${t.text} mb-3`}>📅 Calendar</h3>
-      <p className={t.subtext}>Upcoming events and schedules will appear here</p>
-      <div className="mt-4 space-y-2">
-        <div className={`${t.border} border-l-4 border-blue-500 pl-3 py-2`}>
-          <p className={`font-medium ${t.text}`}>Family Meeting</p>
-          <p className={`text-sm ${t.subtext}`}>Oct 5, 2025 - 6:00 PM</p>
-        </div>
+    <div className={`${t.card} ${t.border} border p-6 rounded-lg shadow-lg`}>
+      <h3 className={`text-xl font-bold mb-3 ${t.text}`}>📅 Upcoming (Next 2 Weeks)</h3>
+      <div className="mt-2 overflow-hidden rounded-md border border-gray-200">
+        <iframe
+          title="Google Calendar"
+          src={calendarSrc}
+          style={{ border: 0, width: '100%', height: 520 }}
+          frameBorder="0"
+          scrolling="no"
+        />
       </div>
+      <p className={`mt-2 text-xs ${t.subtext}`}>
+        Tip: Replace YOUR_CALENDAR_ID with your actual Google Calendar ID in app.js.
+      </p>
     </div>
   );
 };
@@ -195,7 +203,7 @@ const FamilyDashboard = () => {
       const updatedChores = prevData.chores.map(chore =>
         chore.id === choreId ? { ...chore, status: 'completed' } : chore
       );
-      
+
       // Update member points
       const completedChore = prevData.chores.find(c => c.id === choreId);
       const updatedMembers = prevData.familyMembers.map(member =>
@@ -203,7 +211,6 @@ const FamilyDashboard = () => {
           ? { ...member, points: member.points + completedChore.points, completedTasks: member.completedTasks + 1 }
           : member
       );
-
       return {
         ...prevData,
         chores: updatedChores,
@@ -213,7 +220,6 @@ const FamilyDashboard = () => {
   };
 
   const t = themes[theme];
-
   return (
     <div className={`min-h-screen ${t.bg} transition-colors`}>
       {/* Header with Theme Switcher */}
@@ -253,13 +259,12 @@ const FamilyDashboard = () => {
 
 // Export the main component
 export default FamilyDashboard;
-
 // ============================================
 // USAGE NOTES:
 // 1. This component uses React hooks for state management
 // 2. Tailwind CSS classes are used for styling (ensure Tailwind is configured)
 // 3. Each child has their own widget card showing their chores
 // 4. Theme switcher allows toggling between light and dark modes
-// 5. Easy to add new widgets by following the existing pattern
-// 6. To expand: add new components following the WIDGET pattern above
+// 5. Calendar embed requires a public Google Calendar embed URL
+// 6. To limit to next two weeks precisely, consider filtering via Google Calendar API instead of iframe
 // ============================================
