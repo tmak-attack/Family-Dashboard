@@ -9,10 +9,10 @@
 // - HealthCritical (columns: category, priority, task, assignedTo, dueDate, status)
 // - TodaysChores (columns: title, assignedTo, points, status)
 
-const GSHEETS_BASE = '';
-const GSHEETS_FAMILY_RANGE = '';
-const GSHEETS_HEALTH_RANGE = '';
-const GSHEETS_CHORES_RANGE = '';
+const GSHEETS_FAMILY_RANGE  = 'https://docs.google.com/spreadsheets/d/144ldkGQML-BbFH67J6bLpzBrIwYgJjcg/export?format=csv&gid=0';
+const GSHEETS_HEALTH_RANGE  = 'https://docs.google.com/spreadsheets/d/144ldkGQML-BbFH67J6bLpzBrIwYgJjcg/export?format=csv&gid=1';
+const GSHEETS_CHORES_RANGE  = 'https://docs.google.com/spreadsheets/d/144ldkGQML-BbFH67J6bLpzBrIwYgJjcg/export?format=csv&gid=2';
+
 
 // Alternative: Single Apps Script endpoint returning a JSON object with {family, health, chores}
 const GSHEETS_JSON_ENDPOINT = '';
