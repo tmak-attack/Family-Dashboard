@@ -1,41 +1,32 @@
 // ============================================
 // Family Dashboard - Google Sheets Live Sync + Google Keep Shopping Import
 // ============================================
-
 // CONFIG: Publish your Google Sheet to the web (File > Share > Publish to web)
 // Then set these to the published CSV/TSV endpoints or use Sheets API via Apps Script Web App.
 // Expecting three tabs/ranges:
 // - Family (columns: name, avatar, completionRate, points, allowanceDue, status, totalTasks, completedTasks)
 // - HealthCritical (columns: category, priority, task, assignedTo, dueDate, status)
 // - TodaysChores (columns: title, assignedTo, points, status)
-
 const GSHEETS_FAMILY_RANGE  = 'https://docs.google.com/spreadsheets/d/144ldkGQML-BbFH67J6bLpzBrIwYgJjcg/export?format=csv&gid=0';
 const GSHEETS_HEALTH_RANGE  = 'https://docs.google.com/spreadsheets/d/144ldkGQML-BbFH67J6bLpzBrIwYgJjcg/export?format=csv&gid=1';
 const GSHEETS_CHORES_RANGE  = 'https://docs.google.com/spreadsheets/d/144ldkGQML-BbFH67J6bLpzBrIwYgJjcg/export?format=csv&gid=2';
-
-
 // Alternative: Single Apps Script endpoint returning a JSON object with {family, health, chores}
 const GSHEETS_JSON_ENDPOINT = '';
-
 let GOOGLE_KEEP_JSON_URL = '';
-
 function csvToRows(csv) {
   return csv.trim().split(/\r?\n/).map(l => l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(v => v.replace(/^"|"$/g, '')));
 }
-
 function headerRowsToObjects(rows) {
   if (!rows.length) return [];
   const headers = rows[0].map(h => String(h).trim());
   return rows.slice(1).map(r => Object.fromEntries(headers.map((h, i) => [h, r[i] ?? ''])));
 }
-
 async function fetchCsvRange(rangeUrl) {
   const res = await fetch(rangeUrl, { mode: 'cors' });
   if (!res.ok) throw new Error(`Failed to fetch: ${rangeUrl}`);
   const text = await res.text();
   return headerRowsToObjects(csvToRows(text));
 }
-
 async function fetchFromGSheets() {
   // Strategy: Prefer JSON endpoint if provided; otherwise fetch individual CSV ranges
   if (GSHEETS_JSON_ENDPOINT) {
@@ -44,18 +35,14 @@ async function fetchFromGSheets() {
     const json = await r.json();
     return normalizeData(json.family || [], json.health || [], json.chores || []);
   }
-  if (!(GSHEETS_BASE && GSHEETS_FAMILY_RANGE && GSHEETS_HEALTH_RANGE && GSHEETS_CHORES_RANGE)) {
-    throw new Error('Google Sheets config is missing. Set GSHEETS_* values.');
-  }
-  const qs = (range) => `${GSHEETS_BASE}${range}`;
+  // Using direct full URLs above; do not depend on undefined GSHEETS_BASE
   const [familyRows, healthRows, choresRows] = await Promise.all([
-    fetchCsvRange(qs(GSHEETS_FAMILY_RANGE)),
-    fetchCsvRange(qs(GSHEETS_HEALTH_RANGE)),
-    fetchCsvRange(qs(GSHEETS_CHORES_RANGE)),
+    fetchCsvRange(GSHEETS_FAMILY_RANGE),
+    fetchCsvRange(GSHEETS_HEALTH_RANGE),
+    fetchCsvRange(GSHEETS_CHORES_RANGE),
   ]);
   return normalizeData(familyRows, healthRows, choresRows);
 }
-
 function normalizeData(familyRows, healthRows, choresRows) {
   const familyMembers = (familyRows || []).map((r, i) => ({
     id: i + 1,
@@ -68,7 +55,6 @@ function normalizeData(familyRows, healthRows, choresRows) {
     totalTasks: Number(r.totalTasks || r['Total Tasks'] || 0),
     completedTasks: Number(r.completedTasks || r['Completed Tasks'] || 0),
   }));
-
   const byCategory = {};
   for (const r of (healthRows || [])) {
     const category = String(r.category || r.Category || 'General');
@@ -84,7 +70,6 @@ function normalizeData(familyRows, healthRows, choresRows) {
     byCategory[key].tasks.push(item);
   }
   const healthCriticalTasks = Object.values(byCategory);
-
   const todaysChores = (choresRows || []).map((r, i) => ({
     id: i + 1,
     title: String(r.title || r.Task || r.Title || ''),
@@ -94,7 +79,6 @@ function normalizeData(familyRows, healthRows, choresRows) {
   }));
   return { familyMembers, healthCriticalTasks, todaysChores };
 }
-
 // Google Keep Shopping Import (unchanged)
 let shoppingLists = [];
 function parseKeepJson(json) {
@@ -145,10 +129,8 @@ function shoppingAlerts() {
     if (newCount>0) alert(`Shopping: ${newCount} new item(s) added.`);
   } catch(e){ console.warn('Shopping alerts failed', e); }
 }
-
 // Live data state
 let liveChoreData = { familyMembers: [], healthCriticalTasks: [], todaysChores: [] };
-
 // Rendering functions (unchanged from prior version)
 function populateHealthCriticalTasks(){ const el=document.getElementById('healthCriticalContent'); if(!el) return; let h='';
   liveChoreData.healthCriticalTasks.forEach(s=>{ const pc=s.priority==='critical'?'priority-critical':'priority-high'; const pi=s.priority==='critical'?'🚨':'⚠️'; h+=`
@@ -199,7 +181,6 @@ function populateAllowanceTracker(){ const el=document.getElementById('allowance
 function updateHeaderStats(){ const active=(liveChoreData.todaysChores||[]).filter(c=>(c.status||'').toLowerCase()==='pending').length; const total=(liveChoreData.familyMembers||[]).reduce((s,m)=>s+Number(m.totalTasks||0),0); const done=(liveChoreData.familyMembers||[]).reduce((s,m)=>s+Number(m.completedTasks||0),0); const pct=total>0?Math.round((done/total)*100):0; const a=document.getElementById('activeTasks'); const w=document.getElementById('weekProgress'); if(a) a.textContent=active; if(w) w.textContent=`${pct}%`; }
 function triggerHealthAlerts(){ try{ const today=new Date(); const day=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][today.getDay()]; const critSecs=(liveChoreData.healthCriticalTasks||[]).filter(s=>(s.priority||'')==='critical'); const critTasks=critSecs.flatMap(s=>s.tasks||[]); const overdue=(liveChoreData.healthCriticalTasks||[]).flatMap(s=>s.tasks||[]).filter(t=>(t.status||'')!=='completed' && ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].includes(t.dueDate)); const thurs=(day==='Thu')?critTasks.filter(t=>(t.dueDate||'').includes('Thu')):[]; if(overdue.length>0) alert(`Health/Critical: ${overdue.length} tasks need attention.`); if(critSecs.length>0) alert(`Critical sections: ${critSecs.length}. Stay on top of priorities!`); if(thurs.length>0) alert(`Thursday priorities: ${thurs.length} tasks due today.`); }catch(e){ console.warn('Alert generation failed', e); }}
 function renderAll(){ populateHealthCriticalTasks(); populateFamilyOverview(); populateFamilyMembers(); populateTodaysChores(); populateAllowanceTracker(); updateHeaderStats(); triggerHealthAlerts(); renderShoppingLists(); shoppingAlerts(); }
-
 // Initialize + polling using Google Sheets
 async function initDashboard(){
   try{
